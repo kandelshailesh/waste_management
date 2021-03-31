@@ -12,6 +12,7 @@ module.exports = (sequlize, DataTypes) => {
       },
       start_time: {
         type: DataTypes.DATE,
+        allowNull: false,
       },
       title: {
         type: DataTypes.STRING(255),
@@ -19,11 +20,21 @@ module.exports = (sequlize, DataTypes) => {
       },
       description: {
         type: DataTypes.STRING(255),
-        allowNull: true,
+        allowNull: false,
       },
       slug: {
         type: DataTypes.STRING(255),
         unique: true,
+      },
+      status: {
+        type: DataTypes.STRING,
+        defaultValue: 'active',
+        validate: {
+          isIn: {
+            args: [['active', 'hold']],
+            msg: 'Status must be active or hold',
+          },
+        },
       },
     },
     {

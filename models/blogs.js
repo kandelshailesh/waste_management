@@ -13,6 +13,10 @@ module.exports = (sequlize, DataTypes) => {
       title: {
         type: DataTypes.STRING(255),
         allowNull: false,
+        unique: {
+          args: true,
+          msg: 'Title already exist',
+        },
       },
       description: {
         type: DataTypes.STRING(255),
@@ -20,10 +24,28 @@ module.exports = (sequlize, DataTypes) => {
       },
       slug: {
         type: DataTypes.STRING(255),
-        unique: true,
+        unique: {
+          args: true,
+          msg: 'Slug already exist',
+        },
       },
       author_id: {
         type: DataTypes.INTEGER,
+      },
+
+      image: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      status: {
+        type: DataTypes.STRING,
+        defaultValue: 'active',
+        validate: {
+          isIn: {
+            args: [['active', 'hold']],
+            msg: 'Status must be active or hold',
+          },
+        },
       },
     },
     {

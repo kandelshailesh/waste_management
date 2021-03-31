@@ -1,6 +1,6 @@
 module.exports = (sequlize, DataTypes) => {
   let Model = sequlize.define(
-    'subscription_plan',
+    'packages',
     {
       id: {
         type: DataTypes.INTEGER(11),
@@ -11,6 +11,10 @@ module.exports = (sequlize, DataTypes) => {
       name: {
         type: DataTypes.STRING(255),
         allowNull: false,
+        unique: {
+          args: true,
+          msg: 'Name already exist',
+        },
       },
       details: {
         type: DataTypes.STRING(255),
@@ -18,14 +22,16 @@ module.exports = (sequlize, DataTypes) => {
       },
       cost: {
         type: DataTypes.INTEGER(11),
-        default: 0,
+        defaultValue: 0,
       },
       duration: {
         type: DataTypes.INTEGER,
+        allowNull: false,
       },
       unit: {
         type: DataTypes.ENUM,
         values: ['days', 'months', 'years'],
+        allowNull: false,
       },
       status: {
         type: DataTypes.STRING,
@@ -43,10 +49,15 @@ module.exports = (sequlize, DataTypes) => {
     },
     {
       paranoid: true,
-      tableName: 'subscription_plan',
+      tableName: 'packages',
     },
   );
 
-  Model.associate = function (models) {};
+  Model.associate = function (models) {
+    this.hasMany(models.subscriptions, {
+      foreignKey: 'package_id',
+      sourceKey: 'id',
+    });
+  };
   return Model;
 };

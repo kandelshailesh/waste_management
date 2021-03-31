@@ -18,21 +18,37 @@ module.exports = function (sequelize, DataTypes) {
       },
       fullName: {
         type: DataTypes.STRING(255),
-        allowNull: true,
+        allowNull: false,
       },
       username: {
         type: DataTypes.STRING(255),
-        unique: true,
+        unique: {
+          args: true,
+          msg: 'Username already exist',
+        },
       },
       email: {
         type: DataTypes.STRING,
         allowNull: true,
-        unique: true,
+        validate: {
+          isEmail: true,
+        },
+        unique: {
+          args: true,
+          msg: 'Email already exist',
+        },
       },
       phone: {
         type: DataTypes.STRING(20),
         allowNull: false,
-        unique: true,
+        unique: {
+          args: true,
+          msg: 'Phone number already exist',
+        },
+      },
+      address: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
       },
       password: {
         type: DataTypes.STRING,
@@ -57,18 +73,6 @@ module.exports = function (sequelize, DataTypes) {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
       },
-      subscription_id: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      activation_date: {
-        type: DataTypes.DATE,
-        allowNull: true,
-      },
-      renewal_date: {
-        type: DataTypes.DATE,
-        allowNull: true,
-      },
       gender: {
         type: DataTypes.ENUM,
         values: ['male', 'female', 'other'],
@@ -78,12 +82,16 @@ module.exports = function (sequelize, DataTypes) {
         type: DataTypes.BOOLEAN,
         default: false,
       },
-      profile_image: {
+      image: {
         type: DataTypes.TEXT,
         allowNull: true,
       },
       resetPasswordToken: DataTypes.STRING,
       resetPasswordExpiresIn: DataTypes.DATE,
+      slug: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
     },
     { paranoid: true, tableName: 'users' },
   );
@@ -91,7 +99,7 @@ module.exports = function (sequelize, DataTypes) {
     source: ['username'],
   });
   Model.associate = function (models) {
-    this.belongsTo(models.subscription_plan, {
+    this.belongsTo(models.packages, {
       foreignKey: 'subscription_id',
       targetKey: 'id',
     });
@@ -103,11 +111,19 @@ module.exports = function (sequelize, DataTypes) {
       foreignKey: 'author_id',
       sourceKey: 'id',
     });
-    this.hasMany(models.schedule, {
+    this.hasMany(models.complaints, {
+      foreignKey: 'user_id',
+      sourceKey: 'id',
+    });
+    this.hasMany(models.schedules, {
       foreignKey: 'user_id',
       sourceKey: 'id',
     });
     this.hasMany(models.transaction, {
+      foreignKey: 'user_id',
+      sourceKey: 'id',
+    });
+    this.hasOne(models.subscriptions, {
       foreignKey: 'user_id',
       sourceKey: 'id',
     });

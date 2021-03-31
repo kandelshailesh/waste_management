@@ -1,6 +1,6 @@
 module.exports = (sequlize, DataTypes) => {
   let Model = sequlize.define(
-    'schedule_request',
+    'collection_request',
     {
       id: {
         type: DataTypes.INTEGER(11),
@@ -10,21 +10,31 @@ module.exports = (sequlize, DataTypes) => {
       },
       user_id: {
         type: DataTypes.INTEGER,
+        allowNull: false,
       },
-      comment: {
+      location: {
+        type: DataTypes.STRING(255),
+      },
+      remarks: {
         type: DataTypes.STRING(255),
         allowNull: true,
       },
-      requested_at: {
-        type: DataTypes.DATE,
+      status: {
+        type: DataTypes.STRING,
+        defaultValue: 'pending',
+        validate: {
+          isIn: {
+            args: [['pending', 'closed']],
+            msg: 'Status must be pending or closed',
+          },
+        },
       },
     },
     {
       paranoid: true,
-      tableName: 'schedule_request',
+      tableName: 'collection_request',
     },
   );
-
   Model.associate = function (models) {
     this.belongsTo(models.users, { foreignKey: 'user_id', targetKey: 'id' });
   };

@@ -33,6 +33,9 @@ module.exports = function (sequelize, DataTypes) {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      post: {
+        type: DataTypes.STRING(20),
+      },
       type: {
         type: DataTypes.ENUM,
         values: ['normal', 'pickup'],

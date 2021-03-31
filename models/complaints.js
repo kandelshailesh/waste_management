@@ -11,17 +11,42 @@ module.exports = (sequlize, DataTypes) => {
         autoIncrement: true,
       },
       title: {
-        type: DataTypes.DATE,
+        type: DataTypes.TEXT,
+        allowNull: false,
       },
       description: {
         type: DataTypes.STRING(255),
-        allowNull: true,
+        allowNull: false,
       },
-      author_id: {
+      user_id: {
         type: DataTypes.INTEGER,
       },
       slug: {
         type: DataTypes.TEXT,
+      },
+      location: {
+        type: DataTypes.TEXT,
+      },
+      image: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        get: function () {
+          const images = this.getDataValue('image');
+          if (images) return JSON.parse(images);
+        },
+        set: function (value) {
+          if (value) this.setDataValue('image', JSON.stringify(value));
+        },
+      },
+      status: {
+        type: DataTypes.STRING,
+        defaultValue: 'pending',
+        validate: {
+          isIn: {
+            args: [['pending', 'resolved']],
+            msg: 'Status must be pending or resolved',
+          },
+        },
       },
     },
     {
@@ -34,7 +59,7 @@ module.exports = (sequlize, DataTypes) => {
     source: ['title'],
   });
   Model.associate = function (models) {
-    this.belongsTo(models.users, { foreignKey: 'author_id', targetKey: 'id' });
+    this.belongsTo(models.users, { foreignKey: 'user_id', targetKey: 'id' });
   };
   return Model;
 };
