@@ -30,13 +30,13 @@ module.exports = (sequlize, DataTypes) => {
       image: {
         type: DataTypes.TEXT,
         allowNull: true,
-        get: function () {
-          const images = this.getDataValue('image');
-          if (images) return JSON.parse(images);
-        },
-        set: function (value) {
-          if (value) this.setDataValue('image', JSON.stringify(value));
-        },
+        // get: function () {
+        //   const images = this.getDataValue('image');
+        //   if (images) return JSON.parse(images);
+        // },
+        // set: function (value) {
+        //   if (value) this.setDataValue('image', JSON.stringify(value));
+        // },
       },
       status: {
         type: DataTypes.STRING,

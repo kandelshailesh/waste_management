@@ -63,7 +63,7 @@ export const updateBlogController = async (req, res) => {
   const { id } = req.params;
   try {
     if (req.files) {
-      body.image = req.files['image'] ? req.files['image'] : null;
+      body.image = req.files['image'] ? req.files['image'][0].path : null;
     }
     const [err, updatedBlog] = await too(updateBlog(body, id));
     console.log(updatedBlog);

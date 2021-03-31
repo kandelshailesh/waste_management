@@ -2,7 +2,7 @@ const { users, subscriptions, packages } = require('../models');
 const { too, ReS, ReE } = require('../utils');
 const { status_codes_msg, STRINGS } = require('../utils/statusCode.js');
 const { Op } = require('sequelize');
-
+const bcrypt = require('bcrypt');
 export const createUser = async (req, res) => {
   try {
     const param = req.body;
@@ -27,15 +27,30 @@ export const createUser = async (req, res) => {
   }
 };
 
+export const passwordEncrypt = async password => {
+  let salt, hash, err;
+  [err, salt] = await too(bcrypt.genSalt(10));
+  if (err) TE(err.message, true);
+  console.log(salt);
+  [err, hash] = await too(bcrypt.hash(password, salt));
+  if (err) TE(err.message, true);
+
+  return hash;
+};
+
 export const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
+    const param = req.body;
 
     if (req.files) {
-      req.body.image = req.files['image'] ? req.files['image'][0].path : null;
+      param.image = req.files['image'] ? req.files['image'][0].path : null;
     }
-
-    console.log(req.body);
+    if (param) {
+      const pas = await passwordEncrypt(param.password);
+      param.password = pas;
+      param.passwordChangedAt = Date.now();
+    }
     const [err, data] = await too(
       users.update(req.body, { where: { id: id } }),
     );

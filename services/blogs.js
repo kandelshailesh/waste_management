@@ -48,9 +48,7 @@ export const updateBlog = async (param, id) => {
   try {
     let err, data;
     [err, data] = await too(blogs.findOne({ where: { id } }));
-    const { image, deletedImage, ...restParams } = JSON.parse(
-      JSON.stringify(param),
-    );
+    const { deletedImage, ...restParams } = JSON.parse(JSON.stringify(param));
 
     if (err) {
       if (param.image) deleteFile(param.image);
@@ -63,26 +61,6 @@ export const updateBlog = async (param, id) => {
     Object.entries(restParams).map(([key, value]) => {
       data[key] = value;
     });
-    if (param.deletedImage) {
-      if (param.deletedImage.length > 0) {
-        const newarray = data.image;
-        await Promise.all(
-          param.deletedImage.map(async i => {
-            const a = lodash.remove(newarray, function (e) {
-              return e === i;
-            });
-          }),
-        );
-        data.image = newarray;
-      }
-    }
-    if (param.image) {
-      let img = data.image;
-      param.image.forEach(e => {
-        img.push(e.path);
-      });
-      data.image = img;
-    }
 
     const a = await data.save();
     return a;
