@@ -190,7 +190,7 @@ module.exports = function (sequelize, DataTypes) {
     [err, pass] = await too(bcrypt.compare(pw, this.password));
     if (err) TE(err);
 
-    if (!pass) TE('invalid password');
+    if (!pass) TE('Current password didnot match');
     return this;
   };
 

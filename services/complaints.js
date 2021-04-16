@@ -7,13 +7,6 @@ const cleanDeep = require('clean-deep');
 
 export const createComplaint = async param => {
   try {
-    if (param.image) {
-      let img = [];
-      param.image.forEach(e => {
-        img.push(e.path);
-      });
-      param.image = img;
-    }
     const [err, data] = await too(complaints.create(param));
     if (err) return TE(err.message);
     if (data) return data;
@@ -64,26 +57,26 @@ export const updateComplaint = async (param, id) => {
     Object.entries(restParams).map(([key, value]) => {
       data[key] = value;
     });
-    if (param.deletedImage) {
-      if (param.deletedImage.length > 0) {
-        const newarray = data.image;
-        await Promise.all(
-          param.deletedImage.map(async i => {
-            const a = lodash.remove(newarray, function (e) {
-              return e === i;
-            });
-          }),
-        );
-        data.image = newarray;
-      }
-    }
-    if (param.image) {
-      let img = data.image;
-      param.image.forEach(e => {
-        img.push(e.path);
-      });
-      data.image = img;
-    }
+    // if (param.deletedImage) {
+    //   if (param.deletedImage.length > 0) {
+    //     const newarray = data.image;
+    //     await Promise.all(
+    //       param.deletedImage.map(async i => {
+    //         const a = lodash.remove(newarray, function (e) {
+    //           return e === i;
+    //         });
+    //       }),
+    //     );
+    //     data.image = newarray;
+    //   }
+    // }
+    // if (param.image) {
+    //   let img = data.image;
+    //   param.image.forEach(e => {
+    //     img.push(e.path);
+    //   });
+    //   data.image = img;
+    // }
     console.log('lklk', data);
     const a = await data.save();
     return a;

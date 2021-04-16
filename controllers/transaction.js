@@ -1,29 +1,29 @@
 //import system_modules from "../../auth_models/system_modules";
 import {
-  createSubscription,
-  deleteSubscription,
-  getSubscription,
-  updateSubscription,
-} from '../services/subscription';
+  createTransaction,
+  deleteTransaction,
+  getTransaction,
+  updateTransaction,
+} from '../services/transaction';
 
 const { too, ReS, ReE, TE } = require('../services/util');
 const { status_codes_msg } = require('../utils/appStatics');
 const Logger = require('../logger');
 
-export const createSubscriptionController = async (req, res) => {
+export const createTransactionController = async (req, res) => {
   const param = req.body;
 
   try {
-    const [err, newSubscription] = await too(createSubscription(param));
+    const [err, newTransaction] = await too(createTransaction(param));
     if (err) {
       ReE(res, err, status_codes_msg.FAILED.code);
     }
-    if (newSubscription) {
+    if (newTransaction) {
       ReS(
         res,
         {
-          message: 'NEW SUBSCRIPTION ADDED',
-          DATA: newSubscription,
+          message: 'NEW TRANSACTION ADDED',
+          DATA: newTransaction,
         },
         status_codes_msg.CREATED.code,
       );
@@ -33,10 +33,10 @@ export const createSubscriptionController = async (req, res) => {
   }
 };
 
-export const getSubscriptionController = async (req, res) => {
+export const getTransactionController = async (req, res) => {
   const param = req.query;
   try {
-    const [err, packageByKey] = await too(getSubscription(param));
+    const [err, packageByKey] = await too(getTransaction(param));
 
     if (err) {
       return ReE(res, err, status_codes_msg.FAILED.code);
@@ -58,24 +58,22 @@ export const getSubscriptionController = async (req, res) => {
   }
 };
 
-export const updateSubscriptionController = async (req, res) => {
+export const updateTransactionController = async (req, res) => {
   const body = req.body;
   const { id } = req.params;
-
-  console.log('PPP', req.body);
   try {
-    const [err, updatedSubscription] = await too(updateSubscription(body, id));
-    console.log(updatedSubscription);
+    const [err, updatedTransaction] = await too(updateTransaction(body, id));
+    console.log(updatedTransaction);
 
     if (err) {
       return ReE(res, err, status_codes_msg.FAILED.code);
     }
-    if (updatedSubscription) {
+    if (updatedTransaction) {
       return ReS(
         res,
         {
           message: `DATA UPDATED`,
-          DATA: updatedSubscription,
+          DATA: updatedTransaction,
         },
         status_codes_msg.SUCCESS.code,
       );
@@ -85,20 +83,20 @@ export const updateSubscriptionController = async (req, res) => {
   }
 };
 
-export const deleteSubscriptionController = async (req, res) => {
+export const deleteTransactionController = async (req, res) => {
   const { id } = req.params;
   try {
-    const [err, deletedSubscription] = await too(deleteSubscription(id));
+    const [err, deletedTransaction] = await too(deleteTransaction(id));
 
     if (err) {
       return ReE(res, err, status_codes_msg.FAILED.code);
     }
-    if (deletedSubscription) {
+    if (deletedTransaction) {
       return ReS(
         res,
         {
-          message: `EVENT DELETED`,
-          DATA: deletedSubscription,
+          message: `TRANSACTION DELETED`,
+          DATA: deletedTransaction,
         },
         status_codes_msg.SUCCESS.code,
       );

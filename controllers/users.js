@@ -1,12 +1,12 @@
 const { users, subscriptions, packages } = require('../models');
-const { too, ReS, ReE } = require('../utils');
+const { too, ReS, ReE, TE } = require('../utils');
 const { status_codes_msg, STRINGS } = require('../utils/statusCode.js');
 const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
 export const createUser = async (req, res) => {
   try {
     const param = req.body;
-    if (req.files) {
+    if (req?.files?.image) {
       param.image = req.files['image'] ? req.files['image'][0].path : null;
     }
     if (!param.status) {
@@ -40,27 +40,29 @@ export const passwordEncrypt = async password => {
 
 export const updateUser = async (req, res) => {
   try {
+    console.log(req.body);
     const { id } = req.params;
     const param = req.body;
 
-    if (req.files) {
+    if (req?.files?.image) {
       param.image = req.files['image'] ? req.files['image'][0].path : null;
     }
-    if (param) {
+
+    if (param.password) {
       const pas = await passwordEncrypt(param.password);
       param.password = pas;
       param.passwordChangedAt = Date.now();
     }
-    const [err, data] = await too(
-      users.update(req.body, { where: { id: id } }),
-    );
+    const [err, data] = await too(users.update(param, { where: { id: id } }));
     if (err) return ReE(res, err, status_codes_msg.INVALID_ENTITY.code);
-    if (data)
+    if (data) {
+      const [err1, data1] = await too(users.findOne({ where: { id: id } }));
       return ReS(
         res,
-        { message: 'User update successfully', data: data },
+        { message: 'User update successfully', data: data1 },
         status_codes_msg.CREATED.code,
       );
+    }
   } catch (error) {
     return ReE(res, error, status_codes_msg.INVALID_ENTITY.code);
   }
@@ -95,7 +97,7 @@ export const fetchUsers = async (req, res) => {
         include: [{ model: subscriptions, include: [{ model: packages }] }],
       }),
     );
-    // console.log("data",data)
+
     if (err) ReE(res, err, status_codes_msg.INVALID_ENTITY.code);
     if (data) {
       return ReS(
@@ -128,6 +130,7 @@ export const fetchUserByID = async (req, res) => {
 
 export const Login = async (req, res) => {
   try {
+    console.log(req.body);
     const { email, password, username = '' } = req.body;
     let [err, user] = await too(
       users.findOne({
@@ -147,7 +150,7 @@ export const Login = async (req, res) => {
     return ReS(
       res,
       {
-        message: 'Logged in successfully',
+        message: 'Login successfully',
         data: user.toWeb(),
         token: user.getJWT(),
       },
@@ -158,4 +161,37 @@ export const Login = async (req, res) => {
   }
 };
 
-export const updatePassword = async (req, res) => {};
+export const updatePassword = async (req, res) => {
+  try {
+    console.log(req.body);
+    const { id } = req.params;
+    const param = req.body;
+    const { password, new_password } = req.body;
+    let [err, user] = await too(
+      users.findOne({
+        where: { id: id },
+      }),
+    );
+    if (err) TE(err.message);
+    if (!user) TE('User not registered');
+    [err, user] = await too(user.comparePassword(password));
+    if (err) TE(err.message);
+    if (param.new_password) {
+      const pas = await passwordEncrypt(param.password);
+      param.password = pas;
+      param.passwordChangedAt = Date.now();
+    }
+    const [err2, data] = await too(users.update(param, { where: { id: id } }));
+    if (err) return ReE(res, err, status_codes_msg.INVALID_ENTITY.code);
+    if (data) {
+      const [err1, data1] = await too(users.findOne({ where: { id: id } }));
+      return ReS(
+        res,
+        { message: 'Password changed successfully', data: data1 },
+        status_codes_msg.CREATED.code,
+      );
+    }
+  } catch (error) {
+    return ReE(res, error, status_codes_msg.INVALID_ENTITY.code);
+  }
+};

@@ -33,6 +33,7 @@ module.exports = (sequlize, DataTypes) => {
 
   Model.associate = function (models) {
     this.belongsTo(models.users, { foreignKey: 'user_id', targetKey: 'id' });
+    this.belongsTo(models.packages, { foreignKey: 'plan_id', targetKey: 'id' });
   };
   return Model;
 };

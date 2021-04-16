@@ -1,4 +1,4 @@
-const { subscriptions, users, packages } = require('../models');
+const { subscriptions, users, packages, transaction } = require('../models');
 const { too, ReS, ReE, TE, paginate } = require('./util');
 const omit = require('lodash/omit');
 const moment = require('moment');
@@ -20,6 +20,7 @@ export const createSubscription = async param => {
     const [err3, data3] = await too(
       subscriptions.findOne({ where: { user_id }, paranoid: false }),
     );
+
     if (err3) return TE(err2.message);
     if (data3) {
       param['deletedAt'] = null;
@@ -33,9 +34,12 @@ export const createSubscription = async param => {
       const [err1, data1] = await too(
         users.findOne({ where: { id: user_id } }),
       );
+      const [err5, data5] = await too(
+        subscriptions.findOne({ where: { id: data3['id'] } }),
+      );
       data1.subscribed = true;
       await data1.save();
-      if (data4) return data4;
+      if (data4) return data5;
     } else {
       const [err2, data2] = await too(subscriptions.create(param));
       if (err2) return TE(err2.message);
@@ -43,6 +47,9 @@ export const createSubscription = async param => {
         users.findOne({ where: { id: user_id } }),
       );
       data1.subscribed = true;
+
+      const [err6, data6] = await too(transaction.create(param.transaction));
+      if (err6) return TE(err6.message);
       await data1.save();
       if (data2) return data2;
     }
@@ -66,6 +73,7 @@ export const getSubscription = async param => {
         include: [{ model: users }, { model: packages }],
       }),
     );
+    console.log(err);
     if (err) TE(err.message);
     if (!allModules) TE('SOMETHING WENT WRONG WHILE FETCHING');
     return allModules;
@@ -76,19 +84,29 @@ export const getSubscription = async param => {
 
 export const updateSubscription = async (param, id) => {
   try {
+    const package_id = param['package_id'];
     const [err, data] = await too(
-      subscriptions.update(param, { where: { id: id } }),
+      packages.findOne({ where: { id: package_id } }),
     );
-    if (err) TE(err.message);
-    if (!data) TE('SOMETHING WENT WRONG WHILE UPDATING');
     const [err1, data1] = await too(
-      subscriptions.findOne({ where: { id: id } }),
+      subscriptions.findOne({ where: { user_id: id } }),
     );
-    if (err1) TE(err1.message);
-    if (!data1) TE('SOMETHING WENT WRONG WHILE UPDATING');
-    return data1;
+    if (err) return TE(err.message);
+    if (!data) TE('Package not found');
+    param['renewal_date'] = new Date(
+      moment(data1['renewal_date']).add(data['duration'], data['unit']),
+    );
+    console.log(param);
+
+    const [err2, data2] = await too(
+      subscriptions.update(param, { where: { user_id: id } }),
+    );
+    if (err2) return TE(err2.message);
+    const [err6, data6] = await too(transaction.create(param.transaction));
+    if (err6) return TE(err6.message);
+    if (data2) return data2;
   } catch (error) {
-    TE(error.message);
+    return TE(error.message);
   }
 };
 

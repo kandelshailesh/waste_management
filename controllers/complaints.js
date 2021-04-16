@@ -13,8 +13,10 @@ const Logger = require('../logger');
 export const createComplaintController = async (req, res) => {
   const param = req.body;
 
+  console.log(req.files);
+
   if (req.files) {
-    param.image = req.files['image'] ? req.files['image'] : null;
+    param.image = req.files['image'] ? req.files['image'][0].path : null;
   }
 
   try {

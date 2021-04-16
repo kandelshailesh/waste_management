@@ -15,6 +15,7 @@ const employeeController = require('../controllers/employee');
 const scheduleController = require('../controllers/schedules');
 const collectionRequestController = require('../controllers/collection_request');
 const subscriptionController = require('../controllers/subscriptions');
+const transactionController = require('../controllers/transaction');
 
 app.post('/user/signup', userUpload, userController.createUser);
 app.post('/user/login', userController.Login);
@@ -22,11 +23,20 @@ app.get('/users', userController.fetchUsers);
 app.get('/user/:id', userController.fetchUserByID);
 app.patch('/user/:id', userUpload, userController.updateUser);
 app.delete('/user/:id', userController.deleteUser);
+app.patch('/user/change_password/:id', userController.updatePassword);
 
 app.post('/package', packageController.createPackageController);
 app.get('/package', packageController.getPackageController);
 app.patch('/package/:id', packageController.updatePackageController);
 app.delete('/package/:id', packageController.deletePackageController);
+
+app.post('/transaction', transactionController.createTransactionController);
+app.get('/transaction', transactionController.getTransactionController);
+app.patch('/transacion/:id', transactionController.updateTransactionController);
+app.delete(
+  '/transaction/:id',
+  transactionController.deleteTransactionController,
+);
 
 app.post('/event', eventController.createEventController);
 app.get('/event', eventController.getEventController);
