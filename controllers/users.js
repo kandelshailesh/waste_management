@@ -59,7 +59,7 @@ export const updateUser = async (req, res) => {
       const [err1, data1] = await too(users.findOne({ where: { id: id } }));
       return ReS(
         res,
-        { message: 'User update successfully', data: data1 },
+        { message: 'User updated successfully', data: data1 },
         status_codes_msg.CREATED.code,
       );
     }
@@ -177,7 +177,7 @@ export const updatePassword = async (req, res) => {
     [err, user] = await too(user.comparePassword(password));
     if (err) TE(err.message);
     if (param.new_password) {
-      const pas = await passwordEncrypt(param.password);
+      const pas = await passwordEncrypt(param.new_password);
       param.password = pas;
       param.passwordChangedAt = Date.now();
     }
