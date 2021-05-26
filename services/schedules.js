@@ -20,7 +20,6 @@ export const getSchedule = async param => {
   let page, limit;
   page = parseInt(param['page']);
   limit = parseInt(param['limit']);
-  param['user_id'] = 1;
   // param['collection_date']=
   if (!page) page = 1;
   if (!limit) limit = 20;
