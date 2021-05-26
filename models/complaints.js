@@ -27,6 +27,12 @@ module.exports = (sequlize, DataTypes) => {
       location: {
         type: DataTypes.TEXT,
       },
+          lat: {
+        type: DataTypes.TEXT,
+      },
+          lng: {
+        type: DataTypes.TEXT,
+      },
       image: {
         type: DataTypes.TEXT,
         allowNull: true,

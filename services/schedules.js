@@ -1,6 +1,9 @@
+import { Op } from 'sequelize';
+
 const { schedules, users } = require('../models');
 const { too, ReS, ReE, TE, paginate } = require('./util');
 const omit = require('lodash/omit');
+import moment from 'moment';
 
 export const createSchedule = async param => {
   try {
@@ -13,22 +16,45 @@ export const createSchedule = async param => {
 };
 
 export const getSchedule = async param => {
+  console.log(param);
   let page, limit;
   page = parseInt(param['page']);
   limit = parseInt(param['limit']);
+  param['user_id'] = 1;
+  // param['collection_date']=
   if (!page) page = 1;
   if (!limit) limit = 20;
   const query = omit(param, ['page', 'limit']);
   try {
-    const [err, allModules] = await too(
-      schedules.findAndCountAll({
-        where: Object.keys(query).length > 0 ? query : '',
-        ...paginate(page, limit),
-        include: [{ model: users }],
-      }),
-    );
+    let err, allModules;
+    if (param.user_id) {
+      [err, allModules] = await too(
+        schedules.findAndCountAll({
+          where: {
+            [Op.and]: {
+              user_id: param['user_id'],
+              status: 'uncollected',
+              collection_date: {
+                [Op.gte]: moment().toDate(),
+              },
+            },
+          },
+          ...paginate(page, limit),
+          include: [{ model: users }],
+        }),
+      );
+    } else {
+      [err, allModules] = await too(
+        schedules.findAndCountAll({
+          ...paginate(page, limit),
+          include: [{ model: users }],
+        }),
+      );
+    }
+
     if (err) TE(err.message);
     if (!allModules) TE('SOMETHING WENT WRONG WHILE FETCHING');
+    console.log(allModules);
     return allModules;
   } catch (error) {
     TE(error.message);

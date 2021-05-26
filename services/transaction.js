@@ -1,4 +1,4 @@
-const { transaction, packages } = require('../models');
+const { transaction, packages, users } = require('../models');
 const { too, ReS, ReE, TE, paginate } = require('./util');
 const omit = require('lodash/omit');
 
@@ -23,7 +23,7 @@ export const getTransaction = async param => {
     const [err, allModules] = await too(
       transaction.findAndCountAll({
         where: Object.keys(query).length > 0 ? query : '',
-        include: [{ model: packages }],
+        include: [{ model: packages }, { model: users }],
         ...paginate(page, limit),
       }),
     );

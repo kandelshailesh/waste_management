@@ -1,3 +1,5 @@
+import { sequelize } from '../models';
+
 const { complaints, users } = require('../models');
 const { too, ReS, ReE, TE, paginate, deleteFile } = require('./util');
 const omit = require('lodash/omit');
@@ -23,13 +25,28 @@ export const getComplaint = async param => {
   if (!limit) limit = 20;
   const query = omit(param, ['page', 'limit']);
   try {
-    const [err, allModules] = await too(
-      complaints.findAndCountAll({
-        where: Object.keys(query).length > 0 ? query : '',
-        ...paginate(page, limit),
-        include: [{ model: users }],
-      }),
-    );
+    let err, allModules;
+    if (!param.date) {
+      [err, allModules] = await too(
+        complaints.findAndCountAll({
+          where: Object.keys(query).length > 0 ? query : '',
+          ...paginate(page, limit),
+          include: [{ model: users }],
+        }),
+      );
+    } else {
+      [err, allModules] = await too(
+        complaints.findAndCountAll({
+          attributes: [
+            'createdAt',
+            [sequelize.fn('count', sequelize.col('id')), 'total'],
+          ],
+          group: sequelize.fn('DATE', sequelize.col('createdAt')),
+          // 'createdAt',
+        }),
+      );
+    }
+
     if (err) TE(err.message);
     if (!allModules) TE('SOMETHING WENT WRONG WHILE FETCHING');
     return allModules;

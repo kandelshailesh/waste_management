@@ -4,6 +4,7 @@ import {
   deleteSubscription,
   getSubscription,
   updateSubscription,
+  getSubscriptionByPackage,
 } from '../services/subscription';
 
 const { too, ReS, ReE, TE } = require('../services/util');
@@ -49,6 +50,28 @@ export const getSubscriptionController = async (req, res) => {
           DATA: packageByKey.rows,
 
           count: packageByKey.count,
+        },
+        status_codes_msg.SUCCESS.code,
+      );
+    }
+  } catch (error) {
+    return ReE(res, error, status_codes_msg.FAILED.code);
+  }
+};
+
+export const getSubscriptionByPackageController = async (req, res) => {
+  try {
+    const [err, packageByKey] = await too(getSubscriptionByPackage());
+
+    if (err) {
+      return ReE(res, err, status_codes_msg.FAILED.code);
+    }
+    if (packageByKey) {
+      return ReS(
+        res,
+        {
+          message: `FETCH SUCCESSFULLY`,
+          DATA: packageByKey,
         },
         status_codes_msg.SUCCESS.code,
       );

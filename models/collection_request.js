@@ -15,6 +15,12 @@ module.exports = (sequlize, DataTypes) => {
       location: {
         type: DataTypes.STRING(255),
       },
+      lat: {
+        type: DataTypes.TEXT,
+      },
+          lng: {
+        type: DataTypes.TEXT,
+      },
       remarks: {
         type: DataTypes.STRING(255),
         allowNull: true,

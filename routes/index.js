@@ -81,6 +81,11 @@ app.delete('/schedule/:id', scheduleController.deleteScheduleController);
 
 app.post('/subscription', subscriptionController.createSubscriptionController);
 app.get('/subscription', subscriptionController.getSubscriptionController);
+app.get(
+  '/subscription/package',
+  subscriptionController.getSubscriptionByPackageController,
+);
+
 app.patch(
   '/subscription/:id',
   subscriptionController.updateSubscriptionController,

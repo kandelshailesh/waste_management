@@ -1,3 +1,5 @@
+import { sequelize } from '../models';
+
 const { subscriptions, users, packages, transaction } = require('../models');
 const { too, ReS, ReE, TE, paginate } = require('./util');
 const omit = require('lodash/omit');
@@ -66,14 +68,48 @@ export const getSubscription = async param => {
   if (!limit) limit = 20;
   const query = omit(param, ['page', 'limit']);
   try {
+    let err, allModules;
+    if (!param.date) {
+      [err, allModules] = await too(
+        subscriptions.findAndCountAll({
+          where: Object.keys(query).length > 0 ? query : '',
+          ...paginate(page, limit),
+          include: [{ model: users }, { model: packages }],
+        }),
+      );
+    } else {
+      [err, allModules] = await too(
+        subscriptions.findAndCountAll({
+          attributes: [
+            'id',
+            'activation_date',
+            [sequelize.fn('DATE', sequelize.col('activation_date')), 'date'],
+            [sequelize.fn('count', sequelize.col('subscriptions.id')), 'total'],
+          ],
+          include: [{ model: packages }],
+          group: [
+            sequelize.fn('DATE', sequelize.col('activation_date')),
+            'activation_date',
+          ],
+        }),
+      );
+    }
+    console.log(err);
+    if (err) TE(err.message);
+    if (!allModules) TE('SOMETHING WENT WRONG WHILE FETCHING');
+    return allModules;
+  } catch (error) {
+    TE(error.message);
+  }
+};
+
+export const getSubscriptionByPackage = async param => {
+  try {
     const [err, allModules] = await too(
-      subscriptions.findAndCountAll({
-        where: Object.keys(query).length > 0 ? query : '',
-        ...paginate(page, limit),
-        include: [{ model: users }, { model: packages }],
+      packages.findAll({
+        include: [{ model: subscriptions }],
       }),
     );
-    console.log(err);
     if (err) TE(err.message);
     if (!allModules) TE('SOMETHING WENT WRONG WHILE FETCHING');
     return allModules;

@@ -47,7 +47,6 @@ export const getScheduleController = async (req, res) => {
         {
           message: `FETCH SUCCESSFULLY`,
           DATA: packageByKey.rows,
-
           count: packageByKey.count,
         },
         status_codes_msg.SUCCESS.code,
